@@ -6,6 +6,6 @@ This extention automatically adds brackets after writing `=` in jsx. Borrowed fr
 
 -   [Source](https://github.com/ImExoOdeex/jsx-brackets)
 -   [Support/Contact](https://ismcserver.online/discord)
--   [https://ismcserver.online]([https://ismcserver.online)
+-   https://ismcserver.online
 
 **Enjoy!**

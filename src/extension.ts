@@ -3,9 +3,11 @@ import * as vscode from "vscode";
 export function activate(context: vscode.ExtensionContext) {
 	console.log("JSX Auto Brackets is now active!");
 
-	let enabled = vscode.workspace
+	const configEnabled = vscode.workspace
 		.getConfiguration("jsx-brackets.enabled")
-		.get("enabled") as boolean;
+		.get("enabled");
+
+	let enabled = typeof configEnabled === "boolean" ? configEnabled : true;
 
 	const config = vscode.workspace.getConfiguration("jsx-brackets");
 
@@ -20,7 +22,6 @@ export function activate(context: vscode.ExtensionContext) {
 	const disableCommand = vscode.commands.registerCommand(
 		"jsx-brackets.disable",
 		() => {
-			console.log("disabling");
 			enabled = false;
 			config.update("enabled", false);
 		}
@@ -56,8 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
 			"delete",
 			"typeof",
 			"instanceof",
-			"void",
-			"=>"
+			"void"
 		];
 
 		if (definietlyNotJSX.some((word) => token.includes(word))) {
