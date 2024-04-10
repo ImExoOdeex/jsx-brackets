@@ -90,6 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		if (
 			/\s/.test(textBeforeCursor.slice(-1)) ||
+			textBeforeCursor.slice(-1) === "=" ||
 			!isWithinJSX(editor, position)
 		) {
 			return;
