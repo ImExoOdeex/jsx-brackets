@@ -2,7 +2,7 @@
 	"name": "jsx-brackets",
 	"displayName": "Auto JSX Brackets",
 	"description": "Add brackets automatically to every JSX property.",
-	"version": "1.0.1",
+	"version": "2.0.0",
 	"icon": "icon.png",
 	"publisher": "imexoodeex",
 	"repository": {
