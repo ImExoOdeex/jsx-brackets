@@ -1,6 +1,7 @@
 import {
 	Range,
 	window,
+	commands,
 	Position,
 	workspace,
 	SnippetString,
@@ -19,50 +20,6 @@ function isInStringLiteral(lineText: string, index: number): boolean {
 		}
 	}
 	return inSingleQuoteString || inDoubleQuoteString;
-}
-
-function isInsideJSXTag(lineText: string, position: number): boolean {
-	// Check if the line contains non-JSX keywords that indicate we're not in JSX
-	const nonJSXKeywords = [
-		/^\s*(const|let|var)\s+/,
-		/^\s*(if|else|while|for|switch|case)\s*\(/,
-		/^\s*(import|export|return|throw|typeof|instanceof|new|delete|void)\s+/,
-		/^\s*(function|class)\s+/,
-	];
-
-	for (const pattern of nonJSXKeywords) {
-		if (pattern.test(lineText)) {
-			return false;
-		}
-	}
-
-	// Look backwards from position to find if we're inside a JSX tag (between < and >)
-	let lastOpenBracket = -1;
-	let lastCloseBracket = -1;
-
-	for (let i = position - 1; i >= 0; i--) {
-		if (isInStringLiteral(lineText, i)) {
-			continue;
-		}
-
-		if (lineText[i] === ">") {
-			lastCloseBracket = i;
-			break;
-		}
-		if (lineText[i] === "<") {
-			lastOpenBracket = i;
-			break;
-		}
-	}
-
-	// We're inside a JSX tag if we found an opening < without a closing >
-	if (lastOpenBracket !== -1 && lastCloseBracket === -1) {
-		// Verify there's a valid tag name after the <
-		const afterBracket = lineText.substring(lastOpenBracket + 1);
-		return /^[a-zA-Z]/.test(afterBracket);
-	}
-
-	return false;
 }
 
 export function activate(context: ExtensionContext) {
@@ -115,38 +72,76 @@ export function activate(context: ExtensionContext) {
 								}
 							});
 					}
-				} else if (change.text === "" && change.rangeLength === 1) {
-					// Backspace pressed
-					const position = change.range.start;
-					const line = event.document.lineAt(position.line);
-					const charBefore = line.text.substring(
-						position.character - 1,
-						position.character
-					);
-					const charAfter = line.text.substring(
-						position.character,
-						position.character + 1
-					);
-
-					if (charBefore === "{" && charAfter === "}") {
-						// Remove both braces
-						editor.edit((editBuilder) => {
-							editBuilder.delete(
-								new Range(
-									position.line,
-									position.character - 1,
-									position.line,
-									position.character + 1
-								)
-							);
-						});
-					}
 				}
 			}
 		}
 	});
 
+	// Handle backspace to delete empty bracket pairs
+	const backspaceDisposable = commands.registerCommand(
+		"jsx-brackets.handleBackspace",
+		function () {
+			const editor = window.activeTextEditor;
+			if (!editor) {
+				return commands.executeCommand("deleteLeft");
+			}
+
+			// Only handle single cursor with no selection
+			if (editor.selections.length !== 1 || !editor.selection.isEmpty) {
+				return commands.executeCommand("deleteLeft");
+			}
+
+			const position = editor.selection.active;
+			const line = editor.document.lineAt(position.line);
+			const charBefore =
+				position.character > 0 ? line.text[position.character - 1] : "";
+			const charAfter =
+				position.character < line.text.length
+					? line.text[position.character]
+					: "";
+
+			if (charBefore === "{" && charAfter === "}") {
+				// Cursor is between empty {} — delete both brackets
+				return editor.edit((editBuilder) => {
+					editBuilder.delete(
+						new Range(
+							position.line,
+							position.character - 1,
+							position.line,
+							position.character + 1
+						)
+					);
+				});
+			} else {
+				return commands.executeCommand("deleteLeft");
+			}
+		}
+	);
+
+	const enableDisposable = commands.registerCommand(
+		"jsx-brackets.enable",
+		function () {
+			workspace
+				.getConfiguration("jsx-brackets")
+				.update("enabled", true, true);
+			window.showInformationMessage("Auto JSX Brackets enabled.");
+		}
+	);
+
+	const disableDisposable = commands.registerCommand(
+		"jsx-brackets.disable",
+		function () {
+			workspace
+				.getConfiguration("jsx-brackets")
+				.update("enabled", false, true);
+			window.showInformationMessage("Auto JSX Brackets disabled.");
+		}
+	);
+
 	context.subscriptions.push(disposable);
+	context.subscriptions.push(backspaceDisposable);
+	context.subscriptions.push(enableDisposable);
+	context.subscriptions.push(disableDisposable);
 }
 
 export function deactivate() {}

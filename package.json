@@ -2,7 +2,7 @@
 	"name": "jsx-brackets",
 	"displayName": "Auto JSX Brackets",
 	"description": "Add brackets automatically to every JSX property.",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"icon": "icon.png",
 	"publisher": "imexoodeex",
 	"repository": {
@@ -11,7 +11,7 @@
 	},
 	"license": "MIT",
 	"engines": {
-		"vscode": "^1.87.0"
+		"vscode": "^1.109.0"
 	},
 	"categories": [
 		"Other"
@@ -29,6 +29,18 @@
 			{
 				"command": "jsx-brackets.disable",
 				"title": "Disable Auto JSX Brackets"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "jsx-brackets.handleBackspace",
+				"key": "backspace",
+				"when": "editorTextFocus && !editorReadonly && resourceLangId == javascriptreact"
+			},
+			{
+				"command": "jsx-brackets.handleBackspace",
+				"key": "backspace",
+				"when": "editorTextFocus && !editorReadonly && resourceLangId == typescriptreact"
 			}
 		],
 		"configuration": {
@@ -52,14 +64,14 @@
 		"test": "vscode-test"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.87.0",
 		"@types/mocha": "^10.0.6",
 		"@types/node": "18.x",
+		"@types/vscode": "^1.109.0",
 		"@typescript-eslint/eslint-plugin": "^7.0.2",
 		"@typescript-eslint/parser": "^7.0.2",
-		"eslint": "^8.56.0",
-		"typescript": "^5.3.3",
 		"@vscode/test-cli": "^0.0.6",
-		"@vscode/test-electron": "^2.3.9"
+		"@vscode/test-electron": "^2.3.9",
+		"eslint": "^8.56.0",
+		"typescript": "^5.3.3"
 	}
 }
